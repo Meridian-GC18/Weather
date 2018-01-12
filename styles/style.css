@@ -1,3 +1,7 @@
+  /*  
+    * ie global selector is used to apply the given styling to each element 
+    on the page  
+  */
 * {
   box-sizing: border-box; }
 
@@ -112,7 +116,7 @@ body {
   position: fixed;
   -webkit-transform: translate(-50%, -50%);
           transform: translate(-50%, -50%); }
-  .loader #ud811Spinner {
+  .loader #SVGSpinner {
     box-sizing: border-box;
     stroke: #673AB7;
     stroke-width: 3px;
@@ -189,7 +193,12 @@ body {
   transition: opacity 0.333s cubic-bezier(0, 0, 0.21, 1); }
 
 .dialog-container--visible {
+  /*Opacity defines the transparency/solidity of the Add City Dialog*/
   opacity: 1;
+  /*
+  When pointer-events is used on HTML elements,
+  it can specify whether or not an element can respond to mouse (or touch) events. 
+  */
   pointer-events: auto; }
 
 .dialog {
@@ -208,6 +217,7 @@ body {
   transition: transform 0.333s cubic-bezier(0, 0, 0.21, 1) 0.05s, -webkit-transform 0.333s cubic-bezier(0, 0, 0.21, 1) 0.05s;
   padding: 24px; }
 
+/* card will also serve the purpose of class Template logically*/
 .card {
   padding: 16px;
   position: relative;
