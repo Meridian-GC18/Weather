@@ -55,6 +55,10 @@
   document.getElementById('butAddCancel').addEventListener('click', function() {
     // Close the add new city dialog
     app.toggleAddDialog(false);
+    // Make spinner invisible if a cancel button is clicked but there exist forecast cards.
+    if(app.visibleCards){
+      app.spinner.removeAttribute('hidden');
+    }
   });
 
 
@@ -72,6 +76,8 @@
       // "dialog-container") visible & gives the'+'(AddCity) button the sense to respond 
       // to the the touch events.    
       app.addDialog.classList.add('dialog-container--visible');
+      // Hide the Spinner
+      app.spinner.setAttribute('hidden', true);
     } else {
       app.addDialog.classList.remove('dialog-container--visible');
     }
