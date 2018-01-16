@@ -202,11 +202,9 @@
   app.getForecast = function(key, label) {
     // Details: https://developer.yahoo.com/weather/ 
     //var statement = "select * from weather.forecast where woeid=" + key ;
-
     var statement = "select * from weather.forecast where woeid in" + 
                     "(select woeid from geo.places(1) where text='" + key + "') and u='c'";
-    var url = 'https://query.yahooapis.com/v1/public/yql?format=json&q=' +
-        statement;
+    var url = 'https://query.yahooapis.com/v1/public/yql?format=json&q=' + statement;
 
     // TODO add cache logic here
 
