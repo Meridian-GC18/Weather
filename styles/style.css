@@ -224,6 +224,11 @@ body {
   padding-top: 20px;
   font-size: 1.25em; }
 
+.text-box {
+  width: 90%;
+  font-size: 2em;
+  margin-top: 20px; }
+
 .dialog-body {
   padding-top: 20px;
   padding-bottom: 24px; }
