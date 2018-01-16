@@ -40,12 +40,12 @@
   /* Event listener for add city button in add city dialog */
   document.getElementById('butAddCity').addEventListener('click', function() {
     // Add the newly selected city
-    var select = document.getElementById('selectCityToAdd');
-    var selected = select.options[select.selectedIndex];
-    var key = selected.value;
-    var label = selected.textContent;
+    var location = document.getElementById('userInput').value;
+    //var selected = select.options[select.selectedIndex];
+    //var key = select.textContent;
+    // var label = selected.textContent;
     // TODO init the app.selectedCities array here
-    app.getForecast(key, label);
+    app.getForecast(location);
     // TODO push the selected city to the array and save here
     //app.selectedCities.push({key: key, label: label});
     app.toggleAddDialog(false);
@@ -102,18 +102,18 @@
     // if card already exists, then all HTML code structure along with prev values for a key
     // key in visibleCards with name same as data.key ie particluar location will be loaded 
     // into the card variable.  
-    var card = app.visibleCards[data.key];
-
+    var card = app.visibleCards[data.location];
+    
     if (!card) {
       // cloneNode creates a copy of node from HTML Structure of app.cardTemplate 
       // and returns the clone.
       card = app.cardTemplate.cloneNode(true);
       // Removed, as cardTemplate is no longer required in classList of HTML code of Card Element 
       card.classList.remove('cardTemplate');
-      card.querySelector('.location').textContent = data.label;
+      card.querySelector('.location').textContent = data.location;
       card.removeAttribute('hidden');
       app.container.appendChild(card);
-      app.visibleCards[data.key] = card;
+      app.visibleCards[data.location] = card;
       // example of visibleCards variable after the above line is executed below- 
       // {austin: div.card.weather-forecast, boston: div.card.weather-forecast}
       // data.key defines the 'key' by which 'value'(ie HTML Code of Card) should be 
@@ -205,11 +205,10 @@
    * freshest data.
    */
   
-  app.getForecast = function(key, label) {
+  app.getForecast = function(location) {
     // Details: https://developer.yahoo.com/weather/ 
-    //var statement = "select * from weather.forecast where woeid=" + key ;
     var statement = "select * from weather.forecast where woeid in" + 
-                    "(select woeid from geo.places(1) where text='" + key + "') and u='c'";
+                    "(select woeid from geo.places(1) where text='" + location + "') and u='c'";
     var url = 'https://query.yahooapis.com/v1/public/yql?format=json&q=' + statement;
 
     // TODO add cache logic here
@@ -236,8 +235,8 @@
           // Hence, Injecting the key and label values into the results received so as to 
           // make it convenient for cards to take key and label values from results itself.  
           // Note: We can define any new field to results eg: results.example = "PWA"; 
-          results.key = key;
-          results.label = label;
+          results.location = location;
+          //results.label = label;
           results.created = response.query.created;
           app.updateForecastCard(results);
         }
@@ -254,11 +253,11 @@
     // with the object passed as argument ie app.visibleCards to it. 
     // Eg: Contents of key array would be [ 'City1', 'City2'....] 
     var keys = Object.keys(app.visibleCards);     
-    keys.forEach(function(key) {
+    keys.forEach(function(location) {
       // As passing all the arguments to a function in javascript is optional
       // hence, the function getForecast() works here, even without supplying 
       // label parameter to it. The value of argument not passed is set to undefined.
-      app.getForecast(key);
+      app.getForecast(location);
     });
   };
 
