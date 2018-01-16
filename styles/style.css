@@ -227,14 +227,9 @@ body {
 .text-box {
   width: 90%;
   font-size: 2em;
-  margin-top: 20px; }
-
-.dialog-body {
-  padding-top: 20px;
-  padding-bottom: 24px; }
-  .dialog-body select {
-    width: 100%;
-    font-size: 2em; }
+  margin-top: 20px; 
+  padding-top: 10px;
+  margin-bottom: 20px; }
 
 .dialog-buttons {
   padding: 8px !important;

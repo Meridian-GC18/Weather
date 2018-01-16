@@ -41,9 +41,6 @@
   document.getElementById('butAddCity').addEventListener('click', function() {
     // Add the newly selected city
     var location = document.getElementById('userInput').value;
-    //var selected = select.options[select.selectedIndex];
-    //var key = select.textContent;
-    // var label = selected.textContent;
     // TODO init the app.selectedCities array here
     app.getForecast(location);
     // TODO push the selected city to the array and save here
@@ -99,9 +96,9 @@
     var current = data.channel.item.condition;
     var humidity = data.channel.atmosphere.humidity;
     var wind = data.channel.wind;
-    // if card already exists, then all HTML code structure along with prev values for a key
-    // key in visibleCards with name same as data.key ie particluar location will be loaded 
-    // into the card variable.  
+    // if card already exists, then add all HTML code structure along with prev values for a 
+    // location in visibleCards with name same as data.location ie particluar location will 
+    // be loaded into the card variable.  
     var card = app.visibleCards[data.location];
     
     if (!card) {
@@ -116,7 +113,7 @@
       app.visibleCards[data.location] = card;
       // example of visibleCards variable after the above line is executed below- 
       // {austin: div.card.weather-forecast, boston: div.card.weather-forecast}
-      // data.key defines the 'key' by which 'value'(ie HTML Code of Card) should be 
+      // data.location defines the 'location' by which 'value'(ie HTML Code of Card) should be 
       // stored inside variable visibleCards.
     }
 
@@ -230,13 +227,10 @@
           var response = JSON.parse(request.response);   
           // Fetching results from desired attribute in API response. 
           var results = response.query.results;
-          // Without the below 2 lines, the results does not includes the info about 
-          // key and label of location whose data is fetched, only coordinates are present. 
-          // Hence, Injecting the key and label values into the results received so as to 
-          // make it convenient for cards to take key and label values from results itself.  
+          // Adding a new attribute location in results so as to use it later to fill the 
+          // Location entry in the card by referencing it ie. data.location
           // Note: We can define any new field to results eg: results.example = "PWA"; 
           results.location = location;
-          //results.label = label;
           results.created = response.query.created;
           app.updateForecastCard(results);
         }
@@ -250,13 +244,10 @@
   // Iterate all of the cards and attempt to get the latest forecast data
   app.updateForecasts = function() {
     // Object.keys() returns an array of key of each element associated 
-    // with the object passed as argument ie app.visibleCards to it. 
-    // Eg: Contents of key array would be [ 'City1', 'City2'....] 
+    // with the object passed as argument (ie. app.visibleCards) to it. 
+    // Eg: Contents of key array would be [ 'Location1', 'Location2'....] 
     var keys = Object.keys(app.visibleCards);     
     keys.forEach(function(location) {
-      // As passing all the arguments to a function in javascript is optional
-      // hence, the function getForecast() works here, even without supplying 
-      // label parameter to it. The value of argument not passed is set to undefined.
       app.getForecast(location);
     });
   };
@@ -327,49 +318,4 @@
     }
   };
 
-  /*
-   * Fake weather data that is presented when the user first uses the app,
-   * or when the user has not saved any cities.
-   */
-  var initialWeatherForecast = {
-    key: '2459115',
-    label: 'New York, NY',
-    created: '2016-07-22T01:00:00Z',
-    channel: {
-      astronomy: {
-        sunrise: "5:43 am",
-        sunset: "8:21 pm"
-      },
-      item: {
-        condition: {
-          text: "Windy",
-          date: "Thu, 21 Jul 2016 09:00 PM EDT",
-          temp: 56,
-          code: 24
-        },
-        forecast: [
-          {code: 44, high: 86, low: 70},
-          {code: 44, high: 94, low: 73},
-          {code: 4, high: 95, low: 78},
-          {code: 24, high: 75, low: 89},
-          {code: 24, high: 89, low: 77},
-          {code: 44, high: 92, low: 79},
-          {code: 44, high: 89, low: 77}
-        ]
-      },
-      atmosphere: {
-        humidity: 56
-      },
-      wind: {
-        speed: 25,
-        direction: 195
-      }
-    }
-  };
-  // TODO uncomment line below to test app with fake data
-  //app.updateForecastCard(initialWeatherForecast);
-
-  // TODO add startup code here
-
-  // TODO add service worker code here
 })();
