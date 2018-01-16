@@ -222,11 +222,19 @@
       // eg: 1=="1" returns true, due to auto type conversion (typecasting).
       // 1==="1" returns false, because they are of a different type before typecasting.
       // XMLHttpRequest.DONE means that opeartion of downloading data from server is complete.
+      
       if (request.readyState === XMLHttpRequest.DONE) {
         if (request.status === 200) {
           var response = JSON.parse(request.response);   
           // Fetching results from desired attribute in API response. 
           var results = response.query.results;
+          // alerting user for invalid location
+          // TODO : Add an Autocomplete feature for Place Search 
+          // Reference for Autocomplete : https://developers.google.com/places/web-service/autocomplete         
+          if (!results){
+            alert("OOps!! It seems that you have entered an incorrect location!!");
+            return;
+          }
           // Adding a new attribute location in results so as to use it later to fill the 
           // Location entry in the card by referencing it ie. data.location
           // Note: We can define any new field to results eg: results.example = "PWA"; 
@@ -234,10 +242,7 @@
           results.created = response.query.created;
           app.updateForecastCard(results);
         }
-      } else {
-        // Return the initial weather forecast since no data is available.
-        app.updateForecastCard(initialWeatherForecast);
-       }
+      } 
     };    
   };
 
