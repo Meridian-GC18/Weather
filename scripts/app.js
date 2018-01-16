@@ -79,15 +79,20 @@
 
   // Updates a weather card with the latest weather forecast. If the card
   // doesn't already exist, it's cloned from the template.
-  app.updateForecastCard = function(data) {
+  // 'data', is the API response.  
+  app.updateForecastCard = function(data) { 
+    // Here, dataLastUpdated is used to track the time when the data was last created 
+    // for a particular city on the API cloud from where responses are fetched.  
 
+    // TODO: To find in how much time, data in cloud gets created by Yahoo Weather.  
+    
+    // Date() converts the API response into desired format.
     var dataLastUpdated = new Date(data.created);
     var sunrise = data.channel.astronomy.sunrise;
     var sunset = data.channel.astronomy.sunset;
     var current = data.channel.item.condition;
     var humidity = data.channel.atmosphere.humidity;
     var wind = data.channel.wind;
-
     // if card already exists, then all HTML code structure along with prev values for a key
     // key in visibleCards with name same as data.key ie particluar location will be loaded 
     // into the card variable.  
@@ -103,30 +108,41 @@
       card.removeAttribute('hidden');
       app.container.appendChild(card);
       app.visibleCards[data.key] = card;
-      // example of visibleCards variable after the above line is executed - 
+      // example of visibleCards variable after the above line is executed below- 
       // {austin: div.card.weather-forecast, boston: div.card.weather-forecast}
       // data.key defines the 'key' by which 'value'(ie HTML Code of Card) should be 
       // stored inside variable visibleCards.
     }
 
-    // Verifies the data provide is newer than what's already visible
-    // on the card, if it's not bail, if it is, continue and update the
-    // time saved in the card
+    /**
+     * Verifies the data provide is newer than what's already visible
+     * on the card and then update the card accordingly.
+     **/
     var cardLastUpdatedElem = card.querySelector('.card-last-updated');
+    // will be null, during first time, the card is added into the list of forecast cards.  
+    // will hold a value, the next time onwards the card is refreshed to fetch new updates.  
     var cardLastUpdated = cardLastUpdatedElem.textContent;
     if (cardLastUpdated) {
       cardLastUpdated = new Date(cardLastUpdated);
-      // Bail if the card has more recent data then the data
+      // Do Nothing, if the card has more recent data then the data that was last fetched
+      // from Yahoo Weather Cloud.
       if (dataLastUpdated.getTime() < cardLastUpdated.getTime()) {
         return;
       }
-    }
+    }    
     cardLastUpdatedElem.textContent = data.created;
+    // Alternative for above statement: card.querySelector('.card-last-updated').textContent = data.created;
 
     // Setting the values for textContent in card by fetching respective values 
     // from server response.  
     card.querySelector('.description').textContent = current.text;
     card.querySelector('.date').textContent = current.date;
+    // appending the required CSS class to include the icon of current weather condition.
+    // current.code contains the code value response sent by API for each weather type 
+    // and getIconClass() (user defined fucntion) returns the equivalent weather type 
+    // for a code passed to it which inturn acts as the CSS class for that weather type too.
+    // eg : card.querySelector('.current .icon').classList.add("windy"); where 
+    // app.getIconClass returns 'windy' for that respective current.code       
     card.querySelector('.current .icon').classList.add(app.getIconClass(current.code));    
     card.querySelector('.current .temperature .value').textContent =
       Math.round(current.temp);
@@ -162,6 +178,7 @@
           Math.round(daily.low);
       };
     }
+    // Hide the Loading spinner when the first forecast card ever, is done loading with details.
     if (app.isLoading) {
       app.spinner.setAttribute('hidden', true);
       app.container.removeAttribute('hidden');
@@ -241,7 +258,7 @@
     // Weather codes: https://developer.yahoo.com/weather/documentation.html#codes
     weatherCode = parseInt(weatherCode);
     switch (weatherCode) {
-      case 25: // cold
+      case 25: // cold;
       case 32: // sunny
       case 33: // fair (night)
       case 34: // fair (day)
@@ -303,8 +320,7 @@
 
   /*
    * Fake weather data that is presented when the user first uses the app,
-   * or when the user has not saved any cities. See startup code for more
-   * discussion.
+   * or when the user has not saved any cities.
    */
   var initialWeatherForecast = {
     key: '2459115',
