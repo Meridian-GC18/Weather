@@ -222,15 +222,14 @@
       // XMLHttpRequest.DONE means that opeartion of downloading data from server is complete.
       if (request.readyState === XMLHttpRequest.DONE) {
         if (request.status === 200) {
-          var response = JSON.parse(request.response);
-          // Without the below 2 lines, the response does not includes the info about 
-          // key and label of location whose data is fetched, only coordinates are present. 
-          // Hence, Injecting the key and label values into the response received so as to 
-          // make it convenient for cards to take key and label values from response itself.  
-          // Note: We can define any new field to response eg: response.example = "PWA";    
-          console.log(response);
+          var response = JSON.parse(request.response);   
+          // Fetching results from desired attribute in API response. 
           var results = response.query.results;
-          console.log(results);
+          // Without the below 2 lines, the results does not includes the info about 
+          // key and label of location whose data is fetched, only coordinates are present. 
+          // Hence, Injecting the key and label values into the results received so as to 
+          // make it convenient for cards to take key and label values from results itself.  
+          // Note: We can define any new field to results eg: results.example = "PWA"; 
           results.key = key;
           results.label = label;
           results.created = response.query.created;
