@@ -200,9 +200,14 @@
    */
   
   app.getForecast = function(key, label) {
-    var statement = 'select * from weather.forecast where woeid=' + key;
+    // Details: https://developer.yahoo.com/weather/ 
+    //var statement = "select * from weather.forecast where woeid=" + key ;
+
+    var statement = "select * from weather.forecast where woeid in" + 
+                    "(select woeid from geo.places(1) where text='" + key + "') and u='c'";
     var url = 'https://query.yahooapis.com/v1/public/yql?format=json&q=' +
         statement;
+
     // TODO add cache logic here
 
     // Fetch the latest data.
@@ -225,7 +230,9 @@
           // Hence, Injecting the key and label values into the response received so as to 
           // make it convenient for cards to take key and label values from response itself.  
           // Note: We can define any new field to response eg: response.example = "PWA";    
+          console.log(response);
           var results = response.query.results;
+          console.log(results);
           results.key = key;
           results.label = label;
           results.created = response.query.created;
