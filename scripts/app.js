@@ -41,6 +41,8 @@
   document.getElementById('butAddCity').addEventListener('click', function() {
     // Add the newly selected city
     var location = document.getElementById('userInput').value;
+    // Setting the Textfield to empty inorder to remove any previous location value.
+    document.getElementById('userInput').value = "";
     // TODO init the app.selectedCities array here
     app.getForecast(location);
     // TODO push the selected city to the array and save here
@@ -52,8 +54,9 @@
   document.getElementById('butAddCancel').addEventListener('click', function() {
     // Close the add new city dialog
     app.toggleAddDialog(false);
-    // Make spinner invisible if a cancel button is clicked but there exist forecast cards.
-    if(app.visibleCards){
+    // Make spinner visible if a cancel button is clicked and there does not 
+    // exist any forecast cards.
+    if(!app.visibleCards){
       app.spinner.removeAttribute('hidden');
     }
   });
