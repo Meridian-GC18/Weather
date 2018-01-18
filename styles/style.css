@@ -225,13 +225,14 @@ body {
   font-size: 1.25em; }
 
 .text-box {
-  width: 70%;
+  width: 80%;
   font-size: 1.25em;
   margin-top: 20px; 
   margin-bottom: 20px;
   outline-color: #3F51B5;
   border: 0;
-  border-bottom: 1px solid #3F51B5; }
+  border-bottom: 1px solid #3F51B5;
+   }
 
 .dialog-buttons {
   padding: 8px !important;
