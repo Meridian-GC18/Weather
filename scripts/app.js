@@ -54,11 +54,15 @@
   document.getElementById('butAddCancel').addEventListener('click', function() {
     // Close the add new city dialog
     app.toggleAddDialog(false);
-    // Make spinner visible if a cancel button is clicked and there does not 
-    // exist any forecast cards.
-    if(!app.visibleCards){
+    // Setting the Textfield to empty inorder to remove any partially typed location value
+    // which was neither added nor removed from textfield by the user.
+    document.getElementById('userInput').value = "";
+    // Make spinner visible if a cancel button of AddCity Dialog is clicked and user has 
+    // not entered any location ie. the app comes back to its default Loading state.
+    if(app.isLoading){
       app.spinner.removeAttribute('hidden');
     }
+
   });
 
 
