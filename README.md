@@ -1,3 +1,3 @@
-# Weather-PWA
+# Weather
 
 Progressive Web App for Weather Updates.
