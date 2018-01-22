@@ -40,12 +40,11 @@
   /* Event listener for add city button in add city dialog */
   document.getElementById('butAddCity').addEventListener('click', function() {
     // Add the newly selected city
-    var select = document.getElementById('selectCityToAdd');
-    var selected = select.options[select.selectedIndex];
-    var key = selected.value;
-    var label = selected.textContent;
+    var location = document.getElementById('userInput').value;
+    // Setting the Textfield to empty inorder to remove any previous location value.
+    document.getElementById('userInput').value = "";
     // TODO init the app.selectedCities array here
-    app.getForecast(key, label);
+    app.getForecast(location);
     // TODO push the selected city to the array and save here
     //app.selectedCities.push({key: key, label: label});
     app.toggleAddDialog(false);
@@ -55,6 +54,15 @@
   document.getElementById('butAddCancel').addEventListener('click', function() {
     // Close the add new city dialog
     app.toggleAddDialog(false);
+    // Setting the Textfield to empty inorder to remove any partially typed location value
+    // which was neither added nor removed from textfield by the user.
+    document.getElementById('userInput').value = "";
+    // Make spinner visible if a cancel button of AddCity Dialog is clicked and user has 
+    // not entered any location ie. the app comes back to its default Loading state.
+    if(app.isLoading){
+      app.spinner.removeAttribute('hidden');
+    }
+
   });
 
 
@@ -72,6 +80,8 @@
       // "dialog-container") visible & gives the'+'(AddCity) button the sense to respond 
       // to the the touch events.    
       app.addDialog.classList.add('dialog-container--visible');
+      // Hide the Spinner
+      app.spinner.setAttribute('hidden', true);
     } else {
       app.addDialog.classList.remove('dialog-container--visible');
     }
@@ -93,24 +103,24 @@
     var current = data.channel.item.condition;
     var humidity = data.channel.atmosphere.humidity;
     var wind = data.channel.wind;
-    // if card already exists, then all HTML code structure along with prev values for a key
-    // key in visibleCards with name same as data.key ie particluar location will be loaded 
-    // into the card variable.  
-    var card = app.visibleCards[data.key];
-
+    // if card already exists, then add all HTML code structure along with prev values for a 
+    // location in visibleCards with name same as data.location ie particluar location will 
+    // be loaded into the card variable.  
+    var card = app.visibleCards[data.location];
+    
     if (!card) {
       // cloneNode creates a copy of node from HTML Structure of app.cardTemplate 
       // and returns the clone.
       card = app.cardTemplate.cloneNode(true);
       // Removed, as cardTemplate is no longer required in classList of HTML code of Card Element 
       card.classList.remove('cardTemplate');
-      card.querySelector('.location').textContent = data.label;
+      card.querySelector('.location').textContent = data.location;
       card.removeAttribute('hidden');
       app.container.appendChild(card);
-      app.visibleCards[data.key] = card;
+      app.visibleCards[data.location] = card;
       // example of visibleCards variable after the above line is executed below- 
       // {austin: div.card.weather-forecast, boston: div.card.weather-forecast}
-      // data.key defines the 'key' by which 'value'(ie HTML Code of Card) should be 
+      // data.location defines the 'location' by which 'value'(ie HTML Code of Card) should be 
       // stored inside variable visibleCards.
     }
 
@@ -199,11 +209,10 @@
    * freshest data.
    */
   
-  app.getForecast = function(key, label) {
+  app.getForecast = function(location) {
     // Details: https://developer.yahoo.com/weather/ 
-    //var statement = "select * from weather.forecast where woeid=" + key ;
     var statement = "select * from weather.forecast where woeid in" + 
-                    "(select woeid from geo.places(1) where text='" + key + "') and u='c'";
+                    "(select woeid from geo.places(1) where text='" + location + "') and u='c'";
     var url = 'https://query.yahooapis.com/v1/public/yql?format=json&q=' + statement;
 
     // TODO add cache logic here
@@ -220,39 +229,38 @@
       // eg: 1=="1" returns true, due to auto type conversion (typecasting).
       // 1==="1" returns false, because they are of a different type before typecasting.
       // XMLHttpRequest.DONE means that opeartion of downloading data from server is complete.
+      
       if (request.readyState === XMLHttpRequest.DONE) {
         if (request.status === 200) {
           var response = JSON.parse(request.response);   
           // Fetching results from desired attribute in API response. 
           var results = response.query.results;
-          // Without the below 2 lines, the results does not includes the info about 
-          // key and label of location whose data is fetched, only coordinates are present. 
-          // Hence, Injecting the key and label values into the results received so as to 
-          // make it convenient for cards to take key and label values from results itself.  
+          // alerting user for invalid location
+          // TODO : Add an Autocomplete feature for Place Search 
+          // Reference for Autocomplete : https://developers.google.com/places/web-service/autocomplete         
+          if (!results){
+            alert("OOps!! It seems that you have entered an incorrect location!!");
+            return;
+          }
+          // Adding a new attribute location in results so as to use it later to fill the 
+          // Location entry in the card by referencing it ie. data.location
           // Note: We can define any new field to results eg: results.example = "PWA"; 
-          results.key = key;
-          results.label = label;
+          results.location = location;
           results.created = response.query.created;
           app.updateForecastCard(results);
         }
-      } else {
-        // Return the initial weather forecast since no data is available.
-        app.updateForecastCard(initialWeatherForecast);
-       }
+      } 
     };    
   };
 
   // Iterate all of the cards and attempt to get the latest forecast data
   app.updateForecasts = function() {
     // Object.keys() returns an array of key of each element associated 
-    // with the object passed as argument ie app.visibleCards to it. 
-    // Eg: Contents of key array would be [ 'City1', 'City2'....] 
+    // with the object passed as argument (ie. app.visibleCards) to it. 
+    // Eg: Contents of key array would be [ 'Location1', 'Location2'....] 
     var keys = Object.keys(app.visibleCards);     
-    keys.forEach(function(key) {
-      // As passing all the arguments to a function in javascript is optional
-      // hence, the function getForecast() works here, even without supplying 
-      // label parameter to it. The value of argument not passed is set to undefined.
-      app.getForecast(key);
+    keys.forEach(function(location) {
+      app.getForecast(location);
     });
   };
 
@@ -322,49 +330,4 @@
     }
   };
 
-  /*
-   * Fake weather data that is presented when the user first uses the app,
-   * or when the user has not saved any cities.
-   */
-  var initialWeatherForecast = {
-    key: '2459115',
-    label: 'New York, NY',
-    created: '2016-07-22T01:00:00Z',
-    channel: {
-      astronomy: {
-        sunrise: "5:43 am",
-        sunset: "8:21 pm"
-      },
-      item: {
-        condition: {
-          text: "Windy",
-          date: "Thu, 21 Jul 2016 09:00 PM EDT",
-          temp: 56,
-          code: 24
-        },
-        forecast: [
-          {code: 44, high: 86, low: 70},
-          {code: 44, high: 94, low: 73},
-          {code: 4, high: 95, low: 78},
-          {code: 24, high: 75, low: 89},
-          {code: 24, high: 89, low: 77},
-          {code: 44, high: 92, low: 79},
-          {code: 44, high: 89, low: 77}
-        ]
-      },
-      atmosphere: {
-        humidity: 56
-      },
-      wind: {
-        speed: 25,
-        direction: 195
-      }
-    }
-  };
-  // TODO uncomment line below to test app with fake data
-  //app.updateForecastCard(initialWeatherForecast);
-
-  // TODO add startup code here
-
-  // TODO add service worker code here
 })();
