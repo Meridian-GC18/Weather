@@ -100,11 +100,6 @@ body {
     background: url(/images/ic_refresh_white_24px.svg) center center no-repeat; }
   .header #butAdd {
     background: url(/images/ic_add_white_24px.svg) center center no-repeat; }
-     
-  .header #toggleTemperature .slider .round {
-    border-radius: 34px; }
-  .header #toggleTemperature .slider .round:before {
-    border-radius: 50%; }
 
 .header__title {
   font-weight: 400;
