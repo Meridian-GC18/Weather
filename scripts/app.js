@@ -1,4 +1,3 @@
-
 (function() {
 
   // Strict mode helps out in a couple ways:
@@ -37,16 +36,18 @@
     app.toggleAddDialog(true);
   });
 
+  /* Implementing the Location Autocomplete feature */    
+    google.maps.event.addDomListener(window, 'load', function () {
+      new google.maps.places.Autocomplete(document.getElementById('userInput'));
+    });
+
   /* Event listener for add city button in add city dialog */
   document.getElementById('butAddCity').addEventListener('click', function() {
     // Add the newly selected location
     var location = document.getElementById('userInput').value;
     // Setting the Textfield to empty inorder to remove any previous location value.
     document.getElementById('userInput').value = "";
-    // TODO init the app.selectedCities array here
     app.getForecast(location);
-    // TODO push the selected city to the array and save here
-    //app.selectedCities.push({key: key, label: label});
     app.toggleAddDialog(false);
   });
 
@@ -92,10 +93,7 @@
   // 'data', is the API response.  
   app.updateForecastCard = function(data) { 
     // Here, dataLastUpdated is used to track the time when the data was last created 
-    // for a particular city on the API cloud from where responses are fetched.  
-
-    // TODO: To find in how much time, data in cloud gets created by Yahoo Weather.  
-    
+    // for a particular city on the API cloud from where responses are fetched.   
     // Date() converts the API response into desired format.
     var dataLastUpdated = new Date(data.created);
     var sunrise = data.channel.astronomy.sunrise;
@@ -214,9 +212,6 @@
     var statement = "select * from weather.forecast where woeid in" + 
                     "(select woeid from geo.places(1) where text='" + location + "') and u='c'";
     var url = 'https://query.yahooapis.com/v1/public/yql?format=json&q=' + statement;
-
-    // TODO add cache logic here
-
     // Fetch the latest data.
     // Make the XHR to get the data, then update the card
     var request = new XMLHttpRequest();
@@ -263,8 +258,6 @@
       app.getForecast(location);
     });
   };
-
-  // TODO add saveSelectedCities function here
 
   app.getIconClass = function(weatherCode) {
     // Weather codes: https://developer.yahoo.com/weather/documentation.html#codes
@@ -331,3 +324,4 @@
   };
 
 })();
+
