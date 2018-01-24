@@ -9,6 +9,8 @@
   <meta name="description" content="PWA for Meridian">
   <title>Weather by Meridian</title>
   <link rel="stylesheet" type="text/css" href="/styles/style.css">
+  <!-- script for Location Autocomplete feature -->
+  <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=true&libraries=places"></script>
 </head>
 <body>
 
@@ -35,8 +37,8 @@
           <div class="icon"></div>
           <div class="temperature">
             <!-- span tag to properly add position for °C symbol -->
-            <span class="value"></span><span class="scale">°C</span> 
-          </div>
+            <span class="value"></span><span class="scale">°C</span>
+          </div> 
         </div>
         <div class="description">
           <div class="humidity"></div>
@@ -126,10 +128,10 @@
 
   <div class="dialog-container">
     <div class="dialog">
-      <center>
+      <center>    
         <div class="dialog-title">Add new Location</div>
         <div class="input-city">  
-            <input id="userInput" class="text-box" type="text" name="input-city" placeholder="Type a location here ">
+          <input id="userInput" class="text-box" type="text" name="input-city" placeholder="Type a location here">
         </div>
       </center>   
       <div class="dialog-buttons">
