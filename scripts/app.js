@@ -36,9 +36,14 @@
     app.toggleAddDialog(true);
   });
 
+  /* Implementing the Location Autocomplete feature */    
+    google.maps.event.addDomListener(window, 'load', function () {
+      new google.maps.places.Autocomplete(document.getElementById('userInput'));
+    });
+
   /* Event listener for add city button in add city dialog */
   document.getElementById('butAddCity').addEventListener('click', function() {
-    // Add the newly selected city
+    // Add the newly selected Location
     var location = document.getElementById('userInput').value;
     // Setting the Textfield to empty inorder to remove any previous location value.
     document.getElementById('userInput').value = "";
