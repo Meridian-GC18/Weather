@@ -10,7 +10,9 @@
   <title>Weather by Meridian</title>
   <link rel="stylesheet" type="text/css" href="/styles/style.css">
   <!-- script for Location Autocomplete feature -->
-  <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBR1nQEMxdBtNB0oJQ4EIZqFq0lN5kPCvA&libraries=places"></script>
+  <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBR1nQEMxdBtNB0oJQ4EIZqFq0lN5kPCvA&libraries=places" async></script>
+  <!-- async attribute specifies that the script will be executed asynchronously as soon as it is available ie the execution of app.js file will be done independently of request-responses for html and css files & all the code below this line will be made to excecuted and not kept to wait (which is typically done when the execution follows a synchronous pattern) until the response for app.js file and related functionalites in that are obtained by the server. -->
+  <script src="/scripts/app.js" async></script>  
 </head>
 <body>
 
@@ -147,7 +149,5 @@
       <circle id="spinner" cx="16" cy="16" r="14" fill="none"></circle>
     </svg>
   </div>
-  <!-- async attribute  specifies that the script will be executed asynchronously as soon as it is available ie the execution of app.js file will be done independently of request-responses for html and css files & all the code below this line will be made to excecuted and not kept to wait (which is typically done when the execution follows a synchronous pattern) until the response for app.js file and related functionalites in that are obtained by the server. -->
-  <script src="/scripts/app.js" async></script>  
 </body>
 </html>
