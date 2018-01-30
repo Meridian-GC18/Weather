@@ -154,6 +154,10 @@
     card.querySelector('.current .icon').classList.add(app.getIconClass(current.code));    
     card.querySelector('.current .temperature .value').textContent =
       Math.round(current.temp);
+    card.querySelector('.current .subtemp .farenheit').textContent =
+      Math.round((current.temp*1.8)+32);
+    card.querySelector('.current .subtemp .kelvin').textContent =
+      Math.round((current.temp*1)+273.15);
     card.querySelector('.current .sunrise').textContent = sunrise;
     card.querySelector('.current .sunset').textContent = sunset;
     card.querySelector('.current .humidity').textContent =
