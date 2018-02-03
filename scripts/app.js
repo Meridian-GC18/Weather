@@ -9,7 +9,7 @@
   var app = {
     isLoading: true,
     visibleCards: {},
-    selectedCities: [], 
+    preferredLocations: [], 
     // querySelector(), on highest level, returns all the HTML code content defined for class 
     // 'loader' in index.html webpage (document) file & assigns it to the Spinner sub-variable.
     spinner: document.querySelector('.loader'),
@@ -43,11 +43,19 @@
 
   /* Event listener for add city button in add city dialog */
   document.getElementById('butAddCity').addEventListener('click', function() {
-    // Add the newly selected location
+    // Fetching the newly entered location
     var location = document.getElementById('userInput').value;
     // Setting the Textfield to empty inorder to remove any previous location value.
     document.getElementById('userInput').value = "";
+    // Initializing preferredLocations.
+    if (!app.preferredLocations) {
+      app.preferredLocations = [];
+    }
     app.getForecast(location);
+    // Adding the new location into user preferences of locations for which user needs to get
+    // weather details, each time the app is accessed.
+    app.preferredLocations.push(location);
+    app.savePreferredLocations();
     app.toggleAddDialog(false);
   });
 
@@ -259,6 +267,15 @@
     });
   };
 
+  // Save list of locations to localStorage.
+  app.savePreferredLocations = function() {
+  // A common use of JSON is to exchange data to/from a web server. When sending data to a web 
+  // server, the data has to be a string. stringify() is used to convert a JavaScript object 
+  // into a string.
+    var preferredLocations = JSON.stringify(app.preferredLocations);
+    localStorage.preferredLocations = preferredLocations;
+  };
+
   app.getIconClass = function(weatherCode) {
     // Weather codes: https://developer.yahoo.com/weather/documentation.html#codes
     weatherCode = parseInt(weatherCode);
@@ -323,5 +340,41 @@
     }
   };
 
+/************************************************************************
+   * Code required to start the app
+   * NOTE: Here, initially we've used localStorage, which will be later changed.
+   *   localStorage is a synchronous API and has serious performance
+   *   implications and also if a user chooses to clear his cookies & other site 
+   *   data, then all the user location preferences will be lost. Hence, It should 
+   *   not be used in production applications!
+   *   Instead, to check out IDB (https://www.npmjs.com/package/idb) or
+   *   SimpleDB (https://gist.github.com/inexorabletash/c8069c042b734519680c)
+   ************************************************************************/
+
+  app.preferredLocations = localStorage.preferredLocations;
+  if (app.preferredLocations) {
+    // Parsing the data received from the server using JSON.parse(), so that  
+    // the data becomes a JavaScript object.
+    app.preferredLocations = JSON.parse(app.preferredLocations);
+    app.preferredLocations.forEach(function(location) {
+      app.getForecast(location);
+    });
+  } else {
+    /* The user is using the app for the first time, or the user has not
+     * saved any locations, so guess the user's location via IP lookup and then inject
+     * that data into the page.
+     */
+     // TODO: Add & modify the below Code for fetching the current location of user and 
+     // displaying the forecast card accordingly. 
+    
+    /* 
+    app.updateForecastCard(initialWeatherForecast);
+    app.preferredLocations = [
+      { //add preferred location here.
+      }
+    ];
+    app.savePreferredLocations();
+    */
+  }
 })();
 
