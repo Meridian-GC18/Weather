@@ -21,7 +21,7 @@ html {
   overflow: hidden; }
 
 body {
-  display: -webkit-box;ub
+  display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
@@ -264,7 +264,6 @@ body {
 
 .weather-forecast .date, .weather-forecast .description {
   font-size: 1.25em;
-  padding-left: 10%;
    }
 
 .weather-forecast .current {
@@ -283,7 +282,17 @@ body {
     font-size: 4em; }
     .weather-forecast .current .visual .scale {
       font-size: 0.5em;
-      vertical-align: super; }
+      vertical-align: super;
+      font-style: bold;  }
+        .celcius-temperature .fahrenheit-temperature .fahrenheit-value {    
+          font-size: 0.70em; 
+          vertical-align: top;
+          vertical-align: super; }
+        .celcius-temperature .fahrenheit-temperature .fahrenheit-scale {    
+          font-size: 0.37em;
+          vertical-align: super; 
+          vertical-align: top; }  
+    
   .weather-forecast .current .visual, .weather-forecast .current .description {
     -webkit-box-flex: 1;
     -webkit-flex-grow: 1;
@@ -328,11 +337,6 @@ body {
       display: inline-block; }
     .weather-forecast .future .oneday .temp-low {
       color: #888; }
-
-.subtemp{
-  font-size: 0.5em;
-}
-
 
 .weather-forecast .icon {
   background-repeat: no-repeat;
