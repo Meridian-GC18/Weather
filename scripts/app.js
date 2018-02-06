@@ -240,9 +240,7 @@
           var response = JSON.parse(request.response);   
           // Fetching results from desired attribute in API response. 
           var results = response.query.results;
-          // alerting user for invalid location
-          // TODO : Add an Autocomplete feature for Place Search 
-          // Reference for Autocomplete : https://developers.google.com/places/web-service/autocomplete         
+          // alerting user for invalid location        
           if (!results){
             alert("OOps!! It seems that you have entered an incorrect location!!");
             return;
@@ -353,10 +351,11 @@
    *   SimpleDB (https://gist.github.com/inexorabletash/c8069c042b734519680c)
    ************************************************************************/
 
+  // Here, all the preferred Locations are stored as string in app.preferredLocations 
   app.preferredLocations = localStorage.preferredLocations;
   if (app.preferredLocations) {
-    // Parsing the data received from the server using JSON.parse(), so that  
-    // the data becomes a JavaScript object.
+    // Parsing the app.preferredLocations data received from the localStorage using JSON.parse()
+    // so that the preferredLocations data becomes a JavaScript object.
     app.preferredLocations = JSON.parse(app.preferredLocations);
     app.preferredLocations.forEach(function(location) {
       app.getForecast(location);
@@ -377,6 +376,13 @@
     ];
     app.savePreferredLocations();
     */
+  }
+
+  // Checking if the browser supports service workers and registering if it does. 
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker
+             .register('./service-worker.js')
+             .then(function() { console.log('Service Worker Registered'); });
   }
 })();
 
