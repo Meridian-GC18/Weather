@@ -34,7 +34,7 @@
       "timeOut": "2500"
     }
     // Display refresh successful message
-    toastr.success('Weather Foreasts Updated');
+    toastr.success('Weather Forecasts Updated');
   });
 
   /* Event listener for add new city button */
