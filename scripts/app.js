@@ -28,6 +28,13 @@
   document.getElementById('butRefresh').addEventListener('click', function() {
     // Refresh all of the forecasts
     app.updateForecasts();
+    // Setting up toastr Notification  
+    toastr.options = {
+      "positionClass": "toast-bottom-center",
+      "timeOut": "2000"
+    }
+    // Display refresh successful message
+    toastr.success('Weather Cards Refreshed');
   });
 
   /* Event listener for add new city button */
@@ -218,6 +225,7 @@
    */
   
   app.getForecast = function(location) {
+    console.log("Here2");
     // Details: https://developer.yahoo.com/weather/ 
     var statement = "select * from weather.forecast where woeid in" + 
                     "(select woeid from geo.places(1) where text='" + location + "') and u='c'";
@@ -261,8 +269,10 @@
     // Object.keys() returns an array of key of each element associated 
     // with the object passed as argument (ie. app.visibleCards) to it. 
     // Eg: Contents of key array would be [ 'Location1', 'Location2'....] 
-    var keys = Object.keys(app.visibleCards);     
+    var keys = Object.keys(app.visibleCards);
+    console.log(keys);     
     keys.forEach(function(location) {
+      console.log("Here1");
       app.getForecast(location);
     });
   };
