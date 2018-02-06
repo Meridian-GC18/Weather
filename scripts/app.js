@@ -31,10 +31,10 @@
     // Setting up toastr Notification  
     toastr.options = {
       "positionClass": "toast-bottom-center",
-      "timeOut": "2000"
+      "timeOut": "2500"
     }
     // Display refresh successful message
-    toastr.success('Weather Cards Refreshed');
+    toastr.success('Weather Foreasts Updated');
   });
 
   /* Event listener for add new city button */
@@ -225,7 +225,6 @@
    */
   
   app.getForecast = function(location) {
-    console.log("Here2");
     // Details: https://developer.yahoo.com/weather/ 
     var statement = "select * from weather.forecast where woeid in" + 
                     "(select woeid from geo.places(1) where text='" + location + "') and u='c'";
@@ -272,7 +271,6 @@
     var keys = Object.keys(app.visibleCards);
     console.log(keys);     
     keys.forEach(function(location) {
-      console.log("Here1");
       app.getForecast(location);
     });
   };
