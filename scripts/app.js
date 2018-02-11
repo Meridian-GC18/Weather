@@ -28,7 +28,7 @@
     // Setting up toastr Notification  
     toastr.options = {
       "positionClass": "toast-bottom-center",
-      "timeOut": "2500"
+      "timeOut": "1500"
     }
     // Refreshing the forecasts if forecast cards exists
     if (app.preferredLocations.length == 0) {
@@ -55,14 +55,18 @@
   document.getElementById('butAddCity').addEventListener('click', function() {
     // Fetching the newly entered location
     var location = document.getElementById('userInput').value;
-    // Setting the Textfield to empty inorder to remove any previous location value.
-    document.getElementById('userInput').value = "";
-    // Initializing preferredLocations.
-    if (!app.preferredLocations) {
-      app.preferredLocations = [];
-    }
-    app.getForecast(location);
-    app.toggleAddDialog(false);
+    if(location === "" ) {
+      toastr.error("Please enter a location")
+    } else {
+        // Setting the Textfield to empty inorder to remove any previous location value.
+        document.getElementById('userInput').value = "";
+        // Initializing preferredLocations.
+        if (!app.preferredLocations) {
+          app.preferredLocations = [];
+        }
+        app.getForecast(location);
+        app.toggleAddDialog(false);
+      }  
   });
 
   /* Event listener for cancel button in add city dialog */
@@ -247,8 +251,12 @@
           // Fetching results from desired attribute in API response. 
           var results = response.query.results;
           // alerting user for invalid location        
-          if (!results){
-            toastr.error("Ops! It seems that you have entered an incorrect location!");
+          if (!results) {
+            toastr.options = {
+              "positionClass": "toast-bottom-center",
+              "timeOut": "1500"
+            }
+            toastr.error("Looks like an incorrect location ");
             return;
           } else {
               // Adding a new attribute location in results so as to use it later to fill the 
