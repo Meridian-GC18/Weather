@@ -16,7 +16,7 @@
     cardTemplate: document.querySelector('.cardTemplate'),
     container: document.querySelector('.main'),
     addDialog: document.querySelector('.dialog-container'),
-    daysOfWeek: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+    daysOfWeek: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
   };
 
   // Setting up toastr Notification  
@@ -56,7 +56,7 @@
   document.getElementById('butAddCity').addEventListener('click', function() {
     // Fetching the newly entered location
     var location = document.getElementById('userInput').value;
-    if(location === "" ) {
+    if(location === "") {
       toastr.error("Please enter a location");
     } 
     else if(app.preferredLocations.indexOf(location) > -1) {
@@ -68,9 +68,11 @@
         if (!app.preferredLocations) {
           app.preferredLocations = [];
         }
-        app.getForecast(location);
+        // Sending a 'true' parameter inorder to ensure that 'Location added Successfully'
+        // message is only shown in such a condition and not during card refresh situation.
+        app.getForecast(location,true);
         app.toggleAddDialog(false);
-        toastr.success("Location Successfully Added");
+        
       }  
   });
 
@@ -224,15 +226,18 @@
    ****************************************************************************/
 
   /*
-   * Gets a forecast for a specific city and updates the card with the data.
+   * Gets a forecast for a specific location and updates the card with the data.
    * getForecast() first checks if the weather data is in the cache. If so,
    * then it gets that data and populates the card with the cached data.
    * Then, getForecast() goes to the network for fresh data. If the network
    * request goes through, then the card gets updated a second time with the
    * freshest data.
+   * @param Location : location entered by User.
+   * @param callFromAddCityDialog : to determine the component which called the method
+   * inorder to display appropriate user message. 
    */
   
-  app.getForecast = function(location) {
+  app.getForecast = function(location, callFromAddCityDialog) {
     // Details: https://developer.yahoo.com/weather/ 
     var statement = "select * from weather.forecast where woeid in" + 
                     "(select woeid from geo.places(1) where text='" + location + "') and u='c'";
@@ -257,7 +262,7 @@
           var results = response.query.results;
           // alerting user for invalid location        
           if (!results) {
-            toastr.error("Looks like an incorrect location ");
+            toastr.error("Looks like an incorrect location");
             return;
           } else {
               // Adding a new attribute location in results so as to use it later to fill the 
@@ -266,6 +271,7 @@
               results.location = location;
               results.created = response.query.created;
               app.updateForecastCard(results);
+              if(callFromAddCityDialog) { toastr.success("Location Successfully Added"); }
               // Adding the new location into user preferences of locations for which user needs 
               // to get weather details only if its not duplicate.
               if(app.preferredLocations.indexOf(location) === -1) { 
