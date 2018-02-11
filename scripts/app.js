@@ -16,9 +16,8 @@
     cardTemplate: document.querySelector('.cardTemplate'),
     container: document.querySelector('.main'),
     addDialog: document.querySelector('.dialog-container'),
-    daysOfWeek: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+    daysOfWeek: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
   };
-
 
   /*****************************************************************************
    * Event listeners for UI elements
@@ -26,15 +25,19 @@
 
   /* Event listener for refresh button */
   document.getElementById('butRefresh').addEventListener('click', function() {
-    // Refresh all of the forecasts
-    app.updateForecasts();
     // Setting up toastr Notification  
     toastr.options = {
       "positionClass": "toast-bottom-center",
       "timeOut": "2500"
     }
-    // Display refresh successful message
-    toastr.success('Weather Forecasts Updated');
+    // Refreshing the forecasts if forecast cards exists
+    if (app.preferredLocations.length == 0) {
+        toastr.info('No weather cards to refresh!');
+    } else {
+        app.updateForecasts();
+        // Display refresh successful message
+        toastr.success('Weather Forecasts Updated');
+      }
   });
 
   /* Event listener for add new city button */
@@ -59,10 +62,6 @@
       app.preferredLocations = [];
     }
     app.getForecast(location);
-    // Adding the new location into user preferences of locations for which user needs to get
-    // weather details, each time the app is accessed.
-    app.preferredLocations.push(location);
-    app.savePreferredLocations();
     app.toggleAddDialog(false);
   });
 
@@ -249,18 +248,25 @@
           var results = response.query.results;
           // alerting user for invalid location        
           if (!results){
-            alert("OOps!! It seems that you have entered an incorrect location!!");
+            toastr.error("Ops! It seems that you have entered an incorrect location!");
             return;
-          }
-          // Adding a new attribute location in results so as to use it later to fill the 
-          // Location entry in the card by referencing it ie. data.location
-          // Note: We can define any new field to results eg: results.example = "PWA"; 
-          results.location = location;
-          results.created = response.query.created;
-          app.updateForecastCard(results);
+          } else {
+              // Adding a new attribute location in results so as to use it later to fill the 
+              // Location entry in the card by referencing it ie. data.location
+              // Note: We can define any new field to results eg: results.example = "PWA"; 
+              results.location = location;
+              results.created = response.query.created;
+              app.updateForecastCard(results);
+              // Adding the new location into user preferences of locations for which user needs 
+              // to get weather details only if its not duplicate.
+              if(app.preferredLocations.indexOf(location) === -1) { 
+                app.preferredLocations.push(location);
+                app.savePreferredLocations(); 
+              }
+            }  
         }
       } 
-    };    
+    }; 
   };
 
   // Iterate all of the cards and attempt to get the latest forecast data
@@ -269,19 +275,9 @@
     // with the object passed as argument (ie. app.visibleCards) to it. 
     // Eg: Contents of key array would be [ 'Location1', 'Location2'....] 
     var keys = Object.keys(app.visibleCards);
-    console.log(keys);     
     keys.forEach(function(location) {
       app.getForecast(location);
     });
-  };
-
-  // Save list of locations to localStorage.
-  app.savePreferredLocations = function() {
-  // A common use of JSON is to exchange data to/from a web server. When sending data to a web 
-  // server, the data has to be a string. stringify() is used to convert a JavaScript object 
-  // into a string.
-    var preferredLocations = JSON.stringify(app.preferredLocations);
-    localStorage.preferredLocations = preferredLocations;
   };
 
   app.getIconClass = function(weatherCode) {
@@ -350,28 +346,40 @@
 
 /************************************************************************
    * Code required to start the app
-   * NOTE: Here, initially we've used localStorage, which will be later changed.
+   * NOTE: Here, initially we used localStorage, which we later changed because:
    *   localStorage is a synchronous API and has serious performance
-   *   implications and also if a user chooses to clear his cookies & other site 
-   *   data, then all the user location preferences will be lost. Hence, It should 
-   *   not be used in production applications!
-   *   Instead, to check out IDB (https://www.npmjs.com/package/idb) or
-   *   SimpleDB (https://gist.github.com/inexorabletash/c8069c042b734519680c)
+   *   issues and also localStorage is a non-transactional storage meaning it does 
+   *   not implements ACID properties. Hence, It should not be used in production applications!
+   *   Instead, we choose to store data in IndexedDB sort of implementation by using LocalForage.  
    ************************************************************************/
+  
+  // Save list of locations using LocalForage.
+  app.savePreferredLocations = function() {
+  // IndexedDb has too many callbacks and is bit complex to be implemented raw. 
+  // Hence, we prefer using localForage which is a fast and simple storage library 
+  // for JavaScript. localForage improves the offline experience of web app by using 
+  // asynchronous storage (IndexedDB or WebSQL) with a simple, localStorage-like API.
+  // It acts as a wrapper around IndexedDb and helps to use IndexedDb easily & value is 
+  // stored in a key-value pair format. It also stores data in Javascript object format, hence no need to convert Javascript 
+  // object into strings during saving or vice versa. 
+  // 'window' object represents an open window in a browser. 
+    window.localforage.setItem('preferredLocations',app.preferredLocations);
+  };
 
-  // Here, all the preferred Locations are stored as string in app.preferredLocations 
-  app.preferredLocations = localStorage.preferredLocations;
-  if (app.preferredLocations) {
-    // Parsing the app.preferredLocations data received from the localStorage using JSON.parse()
-    // so that the preferredLocations data becomes a JavaScript object.
-    app.preferredLocations = JSON.parse(app.preferredLocations);
-    app.preferredLocations.forEach(function(location) {
-      app.getForecast(location);
+    // err to instantiate an error object inroder to throw any runtime error.
+    // 'preferredLocations' passed as 'LocationList'
+    window.localforage.getItem('preferredLocations', function(err, locationList) {
+      if (locationList) {
+        // No need to use JSON.parse() as data is fetched from LocalForage in String format.
+        app.preferredLocations = locationList;
+        app.preferredLocations.forEach(function(location) {
+          app.getForecast(location);
+        });
+      }    
     });
-  } else {
-    /* The user is using the app for the first time, or the user has not
-     * saved any locations, so guess the user's location via IP lookup and then inject
-     * that data into the page.
+   
+    /* Every time the app is accessed, user's locations has to be saved using IP lookup 
+     * and then injecting that data into the page.
      */
      // TODO: Add & modify the below Code for fetching the current location of user and 
      // displaying the forecast card accordingly. 
@@ -384,7 +392,6 @@
     ];
     app.savePreferredLocations();
     */
-  }
 
   // Checking if the browser supports service workers and registering if it does. 
   if ('serviceWorker' in navigator) {
