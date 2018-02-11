@@ -56,23 +56,21 @@
   document.getElementById('butAddCity').addEventListener('click', function() {
     // Fetching the newly entered location
     var location = document.getElementById('userInput').value;
+    // Setting the Textfield to empty inorder to remove any previous location value.
+    document.getElementById('userInput').value = "";
     if(location === "") {
       toastr.error("Please enter a location");
     } 
     else if(app.preferredLocations.indexOf(location) > -1) {
       toastr.info("Location already added");
     } else {    
-        // Setting the Textfield to empty inorder to remove any previous location value.
-        document.getElementById('userInput').value = "";
         // Initializing preferredLocations.
         if (!app.preferredLocations) {
           app.preferredLocations = [];
         }
         // Sending a 'true' parameter inorder to ensure that 'Location added Successfully'
         // message is only shown in such a condition and not during card refresh situation.
-        app.getForecast(location,true);
-        app.toggleAddDialog(false);
-        
+        app.getForecast(location,true);      
       }  
   });
 
@@ -271,7 +269,10 @@
               results.location = location;
               results.created = response.query.created;
               app.updateForecastCard(results);
-              if(callFromAddCityDialog) { toastr.success("Location Successfully Added"); }
+              if(callFromAddCityDialog) { 
+                toastr.success("Location Successfully Added"); 
+                app.toggleAddDialog(false);  
+              }
               // Adding the new location into user preferences of locations for which user needs 
               // to get weather details only if its not duplicate.
               if(app.preferredLocations.indexOf(location) === -1) { 
