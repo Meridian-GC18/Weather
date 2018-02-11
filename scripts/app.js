@@ -19,20 +19,21 @@
     daysOfWeek: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
   };
 
+  // Setting up toastr Notification  
+    toastr.options = {
+      "positionClass": "toast-bottom-center",
+      "timeOut": "1500"
+    }
+
   /*****************************************************************************
    * Event listeners for UI elements
    ****************************************************************************/
 
   /* Event listener for refresh button */
   document.getElementById('butRefresh').addEventListener('click', function() {
-    // Setting up toastr Notification  
-    toastr.options = {
-      "positionClass": "toast-bottom-center",
-      "timeOut": "1500"
-    }
     // Refreshing the forecasts if forecast cards exists
     if (app.preferredLocations.length == 0) {
-        toastr.info('No weather cards to refresh!');
+        toastr.info('No weather cards to refresh');
     } else {
         app.updateForecasts();
         // Display refresh successful message
@@ -56,8 +57,11 @@
     // Fetching the newly entered location
     var location = document.getElementById('userInput').value;
     if(location === "" ) {
-      toastr.error("Please enter a location")
-    } else {
+      toastr.error("Please enter a location");
+    } 
+    else if(app.preferredLocations.indexOf(location) > -1) {
+      toastr.info("Location already added");
+    } else {    
         // Setting the Textfield to empty inorder to remove any previous location value.
         document.getElementById('userInput').value = "";
         // Initializing preferredLocations.
@@ -66,6 +70,7 @@
         }
         app.getForecast(location);
         app.toggleAddDialog(false);
+        toastr.success("Location Successfully Added");
       }  
   });
 
@@ -252,10 +257,6 @@
           var results = response.query.results;
           // alerting user for invalid location        
           if (!results) {
-            toastr.options = {
-              "positionClass": "toast-bottom-center",
-              "timeOut": "1500"
-            }
             toastr.error("Looks like an incorrect location ");
             return;
           } else {
