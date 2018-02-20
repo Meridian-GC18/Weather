@@ -9,7 +9,7 @@
   var app = {
     isLoading: true,
     visibleCards: {},
-    selectedCities: [], 
+    preferredLocations: [], 
     // querySelector(), on highest level, returns all the HTML code content defined for class 
     // 'loader' in index.html webpage (document) file & assigns it to the Spinner sub-variable.
     spinner: document.querySelector('.loader'),
@@ -19,6 +19,11 @@
     daysOfWeek: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
   };
 
+  // Setting up toastr Notification  
+    toastr.options = {
+      "positionClass": "toast-bottom-center",
+      "timeOut": "1500"
+    }
 
   /*****************************************************************************
    * Event listeners for UI elements
@@ -26,8 +31,14 @@
 
   /* Event listener for refresh button */
   document.getElementById('butRefresh').addEventListener('click', function() {
-    // Refresh all of the forecasts
-    app.updateForecasts();
+    // Refreshing the forecasts if forecast cards exists
+    if (app.preferredLocations.length == 0) {
+        toastr.info('No weather cards to refresh');
+    } else {
+        app.updateForecasts();
+        // Display refresh successful message
+        toastr.success('Weather Forecasts Updated');
+      }
   });
 
   /* Event listener for add new city button */
@@ -43,12 +54,24 @@
 
   /* Event listener for add city button in add city dialog */
   document.getElementById('butAddCity').addEventListener('click', function() {
-    // Add the newly selected Location
+    // Fetching the newly entered location
     var location = document.getElementById('userInput').value;
     // Setting the Textfield to empty inorder to remove any previous location value.
     document.getElementById('userInput').value = "";
-    app.getForecast(location);
-    app.toggleAddDialog(false);
+    if(location === "") {
+      toastr.error("Please enter a location");
+    } 
+    else if(app.preferredLocations.indexOf(location) > -1) {
+      toastr.info("Location already added");
+    } else {    
+        // Initializing preferredLocations.
+        if (!app.preferredLocations) {
+          app.preferredLocations = [];
+        }
+        // Sending a 'true' parameter inorder to ensure that 'Location added Successfully'
+        // message is only shown in such a condition and not during card refresh situation.
+        app.getForecast(location,true);      
+      }  
   });
 
   /* Event listener for cancel button in add city dialog */
@@ -152,8 +175,10 @@
     // eg : card.querySelector('.current .icon').classList.add("windy"); where 
     // app.getIconClass returns 'windy' for that respective current.code       
     card.querySelector('.current .icon').classList.add(app.getIconClass(current.code));    
-    card.querySelector('.current .temperature .value').textContent =
+    card.querySelector('.current .visual .celcius-temperature .value').textContent =
       Math.round(current.temp);
+    card.querySelector('.current .visual .fahrenheit-temperature .fahrenheit-value').textContent =
+      Math.round((current.temp*1.8)+32);
     card.querySelector('.current .sunrise').textContent = sunrise;
     card.querySelector('.current .sunset').textContent = sunset;
     card.querySelector('.current .humidity').textContent =
@@ -199,15 +224,18 @@
    ****************************************************************************/
 
   /*
-   * Gets a forecast for a specific city and updates the card with the data.
+   * Gets a forecast for a specific location and updates the card with the data.
    * getForecast() first checks if the weather data is in the cache. If so,
    * then it gets that data and populates the card with the cached data.
    * Then, getForecast() goes to the network for fresh data. If the network
    * request goes through, then the card gets updated a second time with the
    * freshest data.
+   * @param Location : location entered by User.
+   * @param callFromAddCityDialog : to determine the component which called the method
+   * inorder to display appropriate user message. 
    */
   
-  app.getForecast = function(location) {
+  app.getForecast = function(location, callFromAddCityDialog) {
     // Details: https://developer.yahoo.com/weather/ 
     var statement = "select * from weather.forecast where woeid in" + 
                     "(select woeid from geo.places(1) where text='" + location + "') and u='c'";
@@ -230,22 +258,31 @@
           var response = JSON.parse(request.response);   
           // Fetching results from desired attribute in API response. 
           var results = response.query.results;
-          // alerting user for invalid location
-          // TODO : Add an Autocomplete feature for Place Search 
-          // Reference for Autocomplete : https://developers.google.com/places/web-service/autocomplete         
-          if (!results){
-            alert("OOps!! It seems that you have entered an incorrect location!!");
+          // alerting user for invalid location        
+          if (!results) {
+            toastr.error("Looks like an incorrect location");
             return;
-          }
-          // Adding a new attribute location in results so as to use it later to fill the 
-          // Location entry in the card by referencing it ie. data.location
-          // Note: We can define any new field to results eg: results.example = "PWA"; 
-          results.location = location;
-          results.created = response.query.created;
-          app.updateForecastCard(results);
+          } else {
+              // Adding a new attribute location in results so as to use it later to fill the 
+              // Location entry in the card by referencing it ie. data.location
+              // Note: We can define any new field to results eg: results.example = "PWA"; 
+              results.location = location;
+              results.created = response.query.created;
+              app.updateForecastCard(results);
+              if(callFromAddCityDialog) { 
+                toastr.success("Location Successfully Added"); 
+                app.toggleAddDialog(false);  
+              }
+              // Adding the new location into user preferences of locations for which user needs 
+              // to get weather details only if its not duplicate.
+              if(app.preferredLocations.indexOf(location) === -1) { 
+                app.preferredLocations.push(location);
+                app.savePreferredLocations(); 
+              }
+            }  
         }
       } 
-    };    
+    }; 
   };
 
   // Iterate all of the cards and attempt to get the latest forecast data
@@ -253,7 +290,7 @@
     // Object.keys() returns an array of key of each element associated 
     // with the object passed as argument (ie. app.visibleCards) to it. 
     // Eg: Contents of key array would be [ 'Location1', 'Location2'....] 
-    var keys = Object.keys(app.visibleCards);     
+    var keys = Object.keys(app.visibleCards);
     keys.forEach(function(location) {
       app.getForecast(location);
     });
@@ -323,5 +360,60 @@
     }
   };
 
+/************************************************************************
+   * Code required to start the app
+   * NOTE: Here, initially we used localStorage, which we later changed because:
+   *   localStorage is a synchronous API and has serious performance
+   *   issues and also localStorage is a non-transactional storage meaning it does 
+   *   not implements ACID properties. Hence, It should not be used in production applications!
+   *   Instead, we choose to store data in IndexedDB sort of implementation by using LocalForage.  
+   ************************************************************************/
+  
+  // Save list of locations using LocalForage.
+  app.savePreferredLocations = function() {
+  // IndexedDb has too many callbacks and is bit complex to be implemented raw. 
+  // Hence, we prefer using localForage which is a fast and simple storage library 
+  // for JavaScript. localForage improves the offline experience of web app by using 
+  // asynchronous storage (IndexedDB or WebSQL) with a simple, localStorage-like API.
+  // It acts as a wrapper around IndexedDb and helps to use IndexedDb easily & value is 
+  // stored in a key-value pair format. It also stores data in Javascript object format, hence no need to convert Javascript 
+  // object into strings during saving or vice versa. 
+  // 'window' object represents an open window in a browser. 
+    window.localforage.setItem('preferredLocations',app.preferredLocations);
+  };
+
+    // err to instantiate an error object inroder to throw any runtime error.
+    // 'preferredLocations' passed as 'LocationList'
+    window.localforage.getItem('preferredLocations', function(err, locationList) {
+      if (locationList) {
+        // No need to use JSON.parse() as data is fetched from LocalForage in String format.
+        app.preferredLocations = locationList;
+        app.preferredLocations.forEach(function(location) {
+          app.getForecast(location);
+        });
+      }    
+    });
+   
+    /* Every time the app is accessed, user's locations has to be saved using IP lookup 
+     * and then injecting that data into the page.
+     */
+     // TODO: Add & modify the below Code for fetching the current location of user and 
+     // displaying the forecast card accordingly. 
+    
+    /* 
+    app.updateForecastCard(initialWeatherForecast);
+    app.preferredLocations = [
+      { //add preferred location here.
+      }
+    ];
+    app.savePreferredLocations();
+    */
+
+  // Checking if the browser supports service workers and registering if it does. 
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker
+             .register('./service-worker.js')
+             .then(function() { console.log('Service Worker Registered'); });
+  }
 })();
 

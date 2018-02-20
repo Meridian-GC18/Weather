@@ -234,6 +234,17 @@ body {
   border-bottom: 2px solid #3F51B5;
    }
 
+.switch
+{
+  border: none;
+  background-color: rgb(255, 255, 255);
+  text-decoration: none;
+  }.switch{
+  border: none;
+  background-color: rgb(255, 255, 255);
+  text-decoration: none;
+ }
+
 .dialog-buttons {
   padding: 8px !important;
   float: right; }
@@ -252,7 +263,8 @@ body {
   font-size: 1.75em; }
 
 .weather-forecast .date, .weather-forecast .description {
-  font-size: 1.25em; }
+  font-size: 1.25em;
+   }
 
 .weather-forecast .current {
   display: -webkit-box;
@@ -270,7 +282,17 @@ body {
     font-size: 4em; }
     .weather-forecast .current .visual .scale {
       font-size: 0.5em;
-      vertical-align: super; }
+      vertical-align: super;
+      font-style: bold;  }
+        .celcius-temperature .fahrenheit-temperature .fahrenheit-value {    
+          font-size: 0.70em; 
+          vertical-align: top;
+          vertical-align: super; }
+        .celcius-temperature .fahrenheit-temperature .fahrenheit-scale {    
+          font-size: 0.37em;
+          vertical-align: super; 
+          vertical-align: top; }  
+    
   .weather-forecast .current .visual, .weather-forecast .current .description {
     -webkit-box-flex: 1;
     -webkit-flex-grow: 1;
